@@ -10,7 +10,7 @@ const PHOTOS_DIR = path.join(DATA_DIR, 'photos');
 const FRAME_WIDTH = parseInt(process.env.FRAME_WIDTH || '1080', 10);
 const FRAME_HEIGHT = parseInt(process.env.FRAME_HEIGHT || '1350', 10);
 const SIG_X = parseInt(process.env.SIGNATURE_X || '290', 10);
-const SIG_Y = parseInt(process.env.SIGNATURE_Y || '1000', 10);
+const SIG_Y = parseInt(process.env.SIGNATURE_Y || '575', 10);
 const SIG_W = parseInt(process.env.SIGNATURE_WIDTH || '500', 10);
 const SIG_H = parseInt(process.env.SIGNATURE_HEIGHT || '200', 10);
 

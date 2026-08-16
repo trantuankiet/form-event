@@ -34,11 +34,23 @@
   <img src="<%= imageUrl %>" alt="Anh su kien" />
 
   <div class="actions">
-    <a class="btn btn-download" href="<%= downloadUrl %>">⬇ Tải ảnh về máy</a>
+    <a id="download-link" class="btn btn-download" href="<%= downloadUrl %>">⬇ Tải ảnh về máy</a>
     <a class="btn btn-fb" target="_blank" rel="noopener"
        href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(pageUrl) %>">
       Chia sẻ lên Facebook
     </a>
   </div>
+
+  <script>
+    // Tu dong bat dau tai anh ngay khi vao trang (khong can khach bam gi them),
+    // dong thoi nut "Chia se Facebook" van hien san de khach bam ngay sau do.
+    // Luu y: trinh duyet KHONG cho phep tu dong mo popup/tab Facebook ma khong
+    // co thao tac cham cua nguoi dung (bi chan boi popup blocker), nen buoc
+    // chia se van can 1 cham nhe cua khach - day la gioi han bao mat cua
+    // trinh duyet di dong (iOS Safari, Chrome Android...), khong the vuot qua.
+    window.addEventListener('load', () => {
+      document.getElementById('download-link').click();
+    });
+  </script>
 </body>
 </html>

@@ -13,8 +13,20 @@ const compositor = require('./src/compositor');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'changeme';
+
+// Can thiet khi chay sau reverse proxy (Render, Nginx...) de req.protocol
+// nhan dung 'https' thay vi 'http'
+app.set('trust proxy', true);
+
+// Uu tien BASE_URL neu admin da set thu cong trong bien moi truong.
+// Neu KHONG set (hoac quen set khi deploy), tu dong lay domain that
+// tu chinh request dang goi toi (vd form-event-mpea.onrender.com),
+// tranh bi fallback nham ve localhost khi len production.
+function getBaseUrl(req) {
+  if (process.env.BASE_URL) return process.env.BASE_URL.replace(/\/$/, '');
+  return `${req.protocol}://${req.get('host')}`;
+}
 
 // Dam bao thu muc data ton tai
 fs.mkdirSync(path.join(__dirname, 'data', 'photos'), { recursive: true });
@@ -62,7 +74,7 @@ app.post('/api/submit', async (req, res) => {
       photoFile,
     });
 
-    const photoPageUrl = `${BASE_URL}/photo/${id}`;
+    const photoPageUrl = `${getBaseUrl(req)}/photo/${id}`;
     const qrDataUrl = await QRCode.toDataURL(photoPageUrl, { width: 400, margin: 1 });
 
     res.json({ id, qrDataUrl, photoPageUrl });
@@ -77,10 +89,11 @@ app.get('/photo/:id', (req, res) => {
   const entry = db.getEntry(req.params.id);
   if (!entry) return res.status(404).send('Không tìm thấy ảnh.');
 
+  const baseUrl = getBaseUrl(req);
   res.render('photo', {
-    imageUrl: `${BASE_URL}/photos/${entry.photo_file}`,
-    pageUrl: `${BASE_URL}/photo/${entry.id}`,
-    downloadUrl: `${BASE_URL}/download/${entry.id}`,
+    imageUrl: `${baseUrl}/photos/${entry.photo_file}`,
+    pageUrl: `${baseUrl}/photo/${entry.id}`,
+    downloadUrl: `${baseUrl}/download/${entry.id}`,
     name: entry.name,
   });
 });
@@ -185,5 +198,9 @@ app.get('/admin/export', requireAdmin, async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server dang chay tai http://localhost:${PORT}`);
-  console.log(`BASE_URL (dung cho QR/OG tags): ${BASE_URL}`);
+  if (process.env.BASE_URL) {
+    console.log(`BASE_URL (co dinh, dung cho QR/OG tags): ${process.env.BASE_URL}`);
+  } else {
+    console.log('BASE_URL chua duoc set - se tu dong lay domain that tu request (khuyen nghi van nen set BASE_URL tren production de dam bao chinh xac).');
+  }
 });
