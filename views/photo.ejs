@@ -22,12 +22,14 @@
   }
   img { max-width: 100%; max-height: 70vh; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.5); }
   .actions { margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-  a.btn {
+  a.btn, button.btn {
     text-decoration: none; padding: 14px 22px; border-radius: 999px; font-weight: 600;
     font-size: 16px; display: inline-flex; align-items: center; gap: 8px;
+    border: none; cursor: pointer; font-family: inherit;
   }
   .btn-download { background: #fff; color: #111; }
   .btn-fb { background: #1877f2; color: #fff; }
+  .hint { opacity: 0.75; font-size: 14px; max-width: 380px; text-align: center; margin-top: 14px; }
 </style>
 </head>
 <body>
@@ -35,21 +37,45 @@
 
   <div class="actions">
     <a id="download-link" class="btn btn-download" href="<%= downloadUrl %>">⬇ Tải ảnh về máy</a>
-    <a class="btn btn-fb" target="_blank" rel="noopener"
-       href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(pageUrl) %>">
-      Chia sẻ lên Facebook
-    </a>
+    <button id="share-btn" class="btn btn-fb" type="button">Chia sẻ lên Facebook</button>
   </div>
 
   <script>
-    // Tu dong bat dau tai anh ngay khi vao trang (khong can khach bam gi them),
-    // dong thoi nut "Chia se Facebook" van hien san de khach bam ngay sau do.
-    // Luu y: trinh duyet KHONG cho phep tu dong mo popup/tab Facebook ma khong
-    // co thao tac cham cua nguoi dung (bi chan boi popup blocker), nen buoc
-    // chia se van can 1 cham nhe cua khach - day la gioi han bao mat cua
-    // trinh duyet di dong (iOS Safari, Chrome Android...), khong the vuot qua.
+    const IMAGE_URL = "<%= imageUrl %>";
+    const FB_SHARE_URL = "https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(pageUrl) %>";
+
+    // Tu dong bat dau tai anh ngay khi vao trang
     window.addEventListener('load', () => {
       document.getElementById('download-link').click();
+    });
+
+    // Tai truoc anh duoi nen ngay tu luc vao trang (khong doi khach bam gi),
+    // de khi khach bam nut Chia se thi anh da san sang - phan hoi ngay lap
+    // tuc. Mot so trinh duyet (dac biet Safari) yeu cau lenh mo bang chia se
+    // phai chay ngay trong cu cham cua nguoi dung, neu phai cho tai anh moi
+    // goi thi de bi tu choi khong cho mo.
+    let sharedFilePromise = fetch(IMAGE_URL)
+      .then((resp) => resp.blob())
+      .then((blob) => new File([blob], 'anh-su-kien.png', { type: blob.type || 'image/png' }))
+      .catch(() => null);
+
+    // Luon giu 1 nut "Chia se len Facebook" duy nhat, khong an/hien gi ca.
+    // Ben trong, khi khach bam: neu may ho tro chia se anh that qua bang
+    // chia se goc cua dien thoai (Web Share API - hau het iPhone/Android
+    // doi moi) thi dung cach do vi tin cay hon; neu khong ho tro (vd may
+    // tinh desktop) thi mo link facebook.com/sharer nhu cu.
+    document.getElementById('share-btn').addEventListener('click', async () => {
+      try {
+        const file = await sharedFilePromise;
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'Ảnh sự kiện' });
+          return;
+        }
+      } catch (e) {
+        // Khach bam Huy trong bang chia se, hoac may khong ho tro -
+        // rot xuong mo link Facebook nhu binh thuong ben duoi.
+      }
+      window.open(FB_SHARE_URL, '_blank', 'noopener');
     });
   </script>
 </body>
