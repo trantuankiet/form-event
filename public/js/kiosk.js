@@ -11,7 +11,7 @@
     screens[name].classList.add('active');
   }
 
-  // ---------- Buoc 1: form ----------
+  // ---------- Bước 1: form ----------
   const inpName = document.getElementById('inp-name');
   const inpPhone = document.getElementById('inp-phone');
   const inpAgency = document.getElementById('inp-agency');
@@ -27,10 +27,10 @@
     resizeCanvas();
   });
 
-  // ---------- Buoc 2: chu ky ----------
+  // ---------- Bước 2: chữ ký ----------
   const canvas = document.getElementById('signature-canvas');
   const signaturePad = new SignaturePad(canvas, {
-    backgroundColor: 'rgba(0,0,0,0)', // nen trong suot
+    backgroundColor: 'rgba(0,0,0,0)', // nền trong suốt
     penColor: 'rgb(20,20,20)',
   });
 
@@ -81,10 +81,10 @@
     }
   });
 
-  // ---------- Buoc 4: xong, reset ve man hinh dau ----------
+  // ---------- Bước 4: xong, reset về màn hình đầu ----------
   document.getElementById('btn-done').addEventListener('click', resetKiosk);
 
-  // Tu dong reset sau 25s neu khach khong bam "Xong" (tranh ket may cho nguoi tiep theo)
+  // Tự động reset sau 25s nếu khách không bấm "Xong" (tránh kẹt máy cho người tiếp theo)
   let autoResetTimer = null;
   function armAutoReset() {
     clearTimeout(autoResetTimer);

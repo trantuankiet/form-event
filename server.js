@@ -48,12 +48,7 @@ app.post('/api/submit', async (req, res) => {
     const { name, phone, agency, signature } = req.body;
 
     if (!name || !phone || !agency || !signature) {
-      return res.status(400).json({ error: 'Thieu thong tin bat buoc.' });
-    }
-    if (!compositor.frameExists()) {
-      return res.status(400).json({
-        error: 'He thong chua co frame. Vui long lien he ban to chuc.',
-      });
+      return res.status(400).json({ error: 'Thiếu thông tin bắt buộc.' });
     }
 
     const id = nanoid(10);
@@ -73,14 +68,14 @@ app.post('/api/submit', async (req, res) => {
     res.json({ id, qrDataUrl, photoPageUrl });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Co loi khi xu ly anh, vui long thu lai.' });
+    res.status(500).json({ error: 'Có lỗi khi xử lý ảnh, vui lòng thử lại.' });
   }
 });
 
 // ---------- Trang xem/tai anh (mo khi quet QR bang dien thoai) ----------
 app.get('/photo/:id', (req, res) => {
   const entry = db.getEntry(req.params.id);
-  if (!entry) return res.status(404).send('Khong tim thay anh.');
+  if (!entry) return res.status(404).send('Không tìm thấy ảnh.');
 
   res.render('photo', {
     imageUrl: `${BASE_URL}/photos/${entry.photo_file}`,
@@ -93,7 +88,7 @@ app.get('/photo/:id', (req, res) => {
 // ---------- Tai anh ve may (buoc Content-Disposition de force download) ----------
 app.get('/download/:id', (req, res) => {
   const entry = db.getEntry(req.params.id);
-  if (!entry) return res.status(404).send('Khong tim thay anh.');
+  if (!entry) return res.status(404).send('Không tìm thấy ảnh.');
   const filePath = path.join(compositor.PHOTOS_DIR, entry.photo_file);
   res.download(filePath, `anh-su-kien-${entry.id}.png`);
 });
@@ -128,15 +123,19 @@ app.post('/admin/logout', (req, res) => {
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 app.get('/admin/dashboard', requireAdmin, (req, res) => {
+  const hasCustomFrame = compositor.hasCustomFrame();
   res.render('admin_dashboard', {
     count: db.countEntries(),
-    hasFrame: compositor.frameExists(),
-    frameUrl: compositor.frameExists() ? `/admin/frame-preview?ts=${Date.now()}` : null,
+    hasCustomFrame,
+    frameUrl: `/admin/frame-preview?ts=${Date.now()}`,
   });
 });
 
 app.get('/admin/frame-preview', requireAdmin, (req, res) => {
-  res.sendFile(compositor.FRAME_PATH);
+  const framePath = compositor.hasCustomFrame()
+    ? compositor.FRAME_PATH
+    : path.join(__dirname, 'assets', 'default-frame.png');
+  res.sendFile(framePath);
 });
 
 app.post('/admin/upload-frame', requireAdmin, upload.single('frame'), async (req, res) => {
@@ -147,7 +146,7 @@ app.post('/admin/upload-frame', requireAdmin, upload.single('frame'), async (req
     res.redirect('/admin/dashboard');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Loi khi upload frame.');
+    res.status(500).send('Có lỗi khi tải lên frame.');
   }
 });
 

@@ -1,5 +1,28 @@
 # Photobooth Check-in Sự Kiện
 
+## ⚠️ LƯU Ý QUAN TRỌNG nếu đang deploy trên Render.com free tier
+
+Render **Free Web Service có ổ đĩa tạm thời (ephemeral filesystem)**: mọi thứ ghi
+ra ổ đĩa lúc chạy — bao gồm **database SQLite, frame admin đã tải lên, ảnh khách
+đã tạo** — sẽ **bị xoá sạch mỗi khi service khởi động lại** (restart, redeploy,
+hoặc tự "ngủ" sau ~15 phút không có truy cập rồi "thức dậy" khi có người vào lại).
+
+Điều này có nghĩa là:
+- Nếu em upload frame thật, rồi service ngủ/thức dậy → frame biến mất, phải upload lại.
+- Nếu có khách đã check-in, rồi service restart → **toàn bộ dữ liệu khách bị mất**,
+  không xuất Excel được đầy đủ.
+- Free tier còn có "cold start" (~30-50 giây) lần đầu sau khi ngủ dậy → khách đứng
+  chờ ở iPad sẽ thấy trang bị đơ/loading lâu.
+
+→ **Render free tier chỉ phù hợp để demo/test giao diện, KHÔNG dùng cho sự kiện
+thật với khách thật.** Trước ngày 25/08, em nên chuyển sang một trong các hướng sau:
+1. Nâng cấp Render lên gói trả phí + gắn **Persistent Disk** (giữ được file qua các lần restart).
+2. Deploy lên VPS có SSH riêng (Oracle Cloud Free Tier...) theo hướng dẫn ở mục 3 bên dưới — dữ liệu lưu trên ổ đĩa thật của server, không bị xoá.
+3. Hoặc tối thiểu: xuất Excel backup định kỳ trong lúc test để không mất dữ liệu oan.
+
+---
+
+
 Web app: khách chạm iPad → điền Tên/SĐT/Đại lý → ký tên → hệ thống ghép chữ ký vào
 giữa frame cố định → sinh QR → khách quét bằng điện thoại để tải ảnh + share Facebook.
 Admin có trang riêng để upload frame và xuất Excel danh sách khách.
@@ -24,15 +47,38 @@ Mở `http://localhost:3000` (form khách) và `http://localhost:3000/admin` (tr
 | `FRAME_WIDTH/HEIGHT` | Kích thước ảnh xuất ra (px). |
 | `SIGNATURE_X/Y/WIDTH/HEIGHT` | Vị trí + kích thước khung chữ ký đặt trên frame (tính theo px, gốc trên-trái). Cần đo thử theo frame thật để canh giữa đúng ý đồ hoạ. |
 
-## 3. Chuẩn bị trước sự kiện
+## 3. Trang quản trị (Admin) — cách truy cập, đăng nhập, upload frame
 
-1. Đăng nhập `/admin` bằng `ADMIN_PASSWORD`.
-2. Upload file frame/background (PNG/JPG) — đây là frame **cố định**, dùng chung
-   cho toàn bộ khách trong sự kiện.
-3. Mở `SIGNATURE_X/Y/WIDTH/HEIGHT` trong `.env`, chỉnh sao cho khung chữ ký nằm
-   đúng vị trí mong muốn trên frame, restart server sau khi đổi `.env`.
+**Đường dẫn:** `<BASE_URL>/admin` — ví dụ với Render là
+`https://form-event-mpea.onrender.com/admin`
+(vào thẳng `/admin` cũng tự chuyển sang `/admin/login` nếu chưa đăng nhập).
+
+**Đăng nhập:** dùng đúng 1 mật khẩu, không cần username — chính là giá trị
+`ADMIN_PASSWORD` đặt trong biến môi trường (`.env` khi chạy local, hoặc mục
+**Environment** trong Render Dashboard khi deploy production). Mặc định trong
+`.env.example` là `doimatkhaunay` — **bắt buộc phải đổi giá trị này trước khi
+dùng thật**, đừng để mặc định.
+
+**Sau khi đăng nhập vào `/admin/dashboard`, em sẽ thấy:**
+- Số lượt khách đã check-in (real-time)
+- Nút **"Xuất Excel danh sách"**
+- Khung **"Frame / Background sự kiện"**: xem frame đang dùng (frame mẫu màu
+  xanh nếu chưa upload, hoặc frame thật nếu đã upload) + form để tải lên/thay frame mới
+
+**Các bước chuẩn bị trước sự kiện:**
+1. Vào `/admin`, đăng nhập bằng `ADMIN_PASSWORD`.
+2. Ở khung "Frame / Background sự kiện", bấm **"Chọn file"**, chọn ảnh frame
+   thiết kế thật (PNG/JPG), bấm **"Tải lên / Thay frame mới"**.
+3. Mở `SIGNATURE_X/Y/WIDTH/HEIGHT` trong biến môi trường, chỉnh sao cho khung
+   chữ ký nằm đúng vị trí mong muốn trên frame, sau đó restart server (trên
+   Render: service tự redeploy khi đổi Environment Variables).
 4. Mở trang chủ `/` trên iPad (dùng chế độ Guided Access / Kiosk của iOS để khoá
    khách không thoát ra Safari khác).
+
+> **Nếu chưa kịp upload frame thật:** hệ thống tự động dùng một **frame mẫu**
+> (nền xanh, có chữ "FRAME MẪU") để khách vẫn thao tác được bình thường —
+> sẽ không còn báo lỗi "chưa có frame" nữa như trước. Nhưng nhớ đổi sang frame
+> thật trước khi khai mạc sự kiện.
 
 ## 4. Deploy lên server Linux (Ubuntu) — dùng PM2 + Nginx
 

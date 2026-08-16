@@ -38,17 +38,17 @@
 
   <div class="card">
     <h2>Frame / Background sự kiện</h2>
-    <% if (!hasFrame) { %>
-      <p class="warn">Chưa có frame nào được upload. Khách sẽ KHÔNG thể lấy ảnh cho tới khi bạn upload frame ở đây.</p>
+    <% if (!hasCustomFrame) { %>
+      <p class="warn">Chưa có frame thật nào được tải lên. Hệ thống đang tạm dùng <strong>frame mẫu</strong> bên dưới để khách vẫn thao tác được bình thường — hãy tải lên frame thật của sự kiện trước khi khai mạc.</p>
     <% } else { %>
-      <p>Frame hiện tại:</p>
-      <img class="preview" src="<%= frameUrl %>" alt="frame hien tai" />
+      <p>Frame hiện tại (frame thật của sự kiện):</p>
     <% } %>
+    <img class="preview" src="<%= frameUrl %>" alt="frame hien tai" />
     <form method="POST" action="/admin/upload-frame" enctype="multipart/form-data">
       <input type="file" name="frame" accept="image/png,image/jpeg" required />
-      <button type="submit">Upload / Thay frame mới</button>
+      <button type="submit">Tải lên / Thay frame mới</button>
     </form>
-    <p style="color:#888; font-size:13px;">Lưu ý: đổi frame sẽ chỉ áp dụng cho ảnh tạo SAU thời điểm upload, ảnh cũ đã sinh trước đó không đổi.</p>
+    <p style="color:#888; font-size:13px;">Lưu ý: đổi frame chỉ áp dụng cho ảnh tạo SAU thời điểm tải lên, ảnh cũ đã sinh trước đó không đổi.</p>
   </div>
 </div>
 </body>

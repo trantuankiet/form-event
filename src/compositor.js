@@ -4,6 +4,7 @@ const sharp = require('sharp');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const FRAME_PATH = path.join(DATA_DIR, 'frame.png');
+const DEFAULT_FRAME_PATH = path.join(__dirname, '..', 'assets', 'default-frame.png');
 const PHOTOS_DIR = path.join(DATA_DIR, 'photos');
 
 const FRAME_WIDTH = parseInt(process.env.FRAME_WIDTH || '1080', 10);
@@ -13,18 +14,23 @@ const SIG_Y = parseInt(process.env.SIGNATURE_Y || '1000', 10);
 const SIG_W = parseInt(process.env.SIGNATURE_WIDTH || '500', 10);
 const SIG_H = parseInt(process.env.SIGNATURE_HEIGHT || '200', 10);
 
-function frameExists() {
+// Frame do admin upload co ton tai khong (frame that cua su kien)
+function hasCustomFrame() {
   return fs.existsSync(FRAME_PATH);
 }
 
+// Duong dan frame se dung de ghep anh: uu tien frame admin, neu chua co thi dung frame mau
+function getActiveFramePath() {
+  return hasCustomFrame() ? FRAME_PATH : DEFAULT_FRAME_PATH;
+}
+
 /**
- * Ghep chu ky (base64 PNG, nen trong suot) len giua frame co dinh.
- * Tra ve duong dan file anh ket qua (trong data/photos).
+ * Ghép chữ ký (base64 PNG, nền trong suốt) lên giữa frame.
+ * Ưu tiên dùng frame admin đã upload; nếu chưa có thì dùng frame mẫu mặc định.
+ * Trả về đường dẫn file ảnh kết quả (trong data/photos).
  */
 async function composePhoto({ id, signatureDataUrl }) {
-  if (!frameExists()) {
-    throw new Error('Chua co frame nao duoc upload trong trang quan tri.');
-  }
+  const activeFramePath = getActiveFramePath();
 
   const base64 = signatureDataUrl.replace(/^data:image\/png;base64,/, '');
   const sigBuffer = Buffer.from(base64, 'base64');
@@ -40,7 +46,7 @@ async function composePhoto({ id, signatureDataUrl }) {
     .png()
     .toBuffer();
 
-  const frameBuffer = await sharp(FRAME_PATH)
+  const frameBuffer = await sharp(activeFramePath)
     .resize(FRAME_WIDTH, FRAME_HEIGHT, { fit: 'cover' })
     .toBuffer();
 
@@ -65,7 +71,7 @@ async function saveFrame(uploadedFilePath) {
 module.exports = {
   composePhoto,
   saveFrame,
-  frameExists,
+  hasCustomFrame,
   FRAME_PATH,
   PHOTOS_DIR,
 };
