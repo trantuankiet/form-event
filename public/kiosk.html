@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Check-in sự kiện</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <!-- BƯỚC 1: FORM THÔNG TIN -->
+  <section id="screen-form" class="screen active">
+    <div class="card">
+      <h1>Thông tin tham dự</h1>
+      <div class="field">
+        <label>Họ và tên</label>
+        <input type="text" id="inp-name" placeholder="Nguyễn Văn A" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label>Số điện thoại</label>
+        <input type="tel" id="inp-phone" placeholder="09xxxxxxxx" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label>Tên đại lý</label>
+        <input type="text" id="inp-agency" placeholder="Tên đại lý" autocomplete="off" />
+      </div>
+      <p id="form-error" class="error"></p>
+      <button id="btn-to-sign" class="btn-primary">Tiếp tục ký tên →</button>
+    </div>
+  </section>
+
+  <!-- BƯỚC 2: KÝ TÊN -->
+  <section id="screen-sign" class="screen">
+    <div class="card card-wide">
+      <h1>Vui lòng ký tên bên dưới</h1>
+      <div class="sign-box">
+        <canvas id="signature-canvas"></canvas>
+      </div>
+      <div class="sign-actions">
+        <button id="btn-clear" class="btn-secondary">Ký lại</button>
+        <button id="btn-back" class="btn-secondary">← Quay lại</button>
+        <button id="btn-submit" class="btn-primary">Hoàn tất ✓</button>
+      </div>
+      <p id="sign-error" class="error"></p>
+    </div>
+  </section>
+
+  <!-- BƯỚC 3: LOADING -->
+  <section id="screen-loading" class="screen">
+    <div class="card center">
+      <div class="spinner"></div>
+      <p>Đang tạo ảnh của bạn...</p>
+    </div>
+  </section>
+
+  <!-- BƯỚC 4: HIỆN QR -->
+  <section id="screen-qr" class="screen">
+    <div class="card center">
+      <h1>Quét mã QR để tải ảnh</h1>
+      <img id="qr-image" alt="QR code" />
+      <p class="hint">Dùng camera điện thoại quét mã trên để tải ảnh và chia sẻ lên Facebook</p>
+      <button id="btn-done" class="btn-primary">Xong, quay lại màn hình chính</button>
+    </div>
+  </section>
+
+  <script src="/js/signature_pad.umd.min.js"></script>
+  <script src="/js/kiosk.js"></script>
+</body>
+</html>

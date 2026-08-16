@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ảnh sự kiện của <%= name %></title>
+
+<!-- Open Graph de Facebook lay dung anh khi share -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Ảnh sự kiện của <%= name %>" />
+<meta property="og:description" content="Xem và tải ảnh sự kiện của bạn" />
+<meta property="og:image" content="<%= imageUrl %>" />
+<meta property="og:url" content="<%= pageUrl %>" />
+
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #111; color: #fff; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  img { max-width: 100%; max-height: 70vh; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.5); }
+  .actions { margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  a.btn {
+    text-decoration: none; padding: 14px 22px; border-radius: 999px; font-weight: 600;
+    font-size: 16px; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-download { background: #fff; color: #111; }
+  .btn-fb { background: #1877f2; color: #fff; }
+</style>
+</head>
+<body>
+  <img src="<%= imageUrl %>" alt="Anh su kien" />
+
+  <div class="actions">
+    <a class="btn btn-download" href="<%= downloadUrl %>">⬇ Tải ảnh về máy</a>
+    <a class="btn btn-fb" target="_blank" rel="noopener"
+       href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(pageUrl) %>">
+      Chia sẻ lên Facebook
+    </a>
+  </div>
+</body>
+</html>

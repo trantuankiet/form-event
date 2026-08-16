@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Đăng nhập quản trị</title>
+<style>
+  body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background:#f4f5f7;
+    display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
+  form { background:#fff; padding:32px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,.08); width:320px; }
+  h1 { font-size:20px; margin-top:0; }
+  input { width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; }
+  button { width:100%; padding:12px; background:#111; color:#fff; border:none; border-radius:8px; font-size:16px; cursor:pointer; }
+  .error { color:#d33; font-size:14px; }
+</style>
+</head>
+<body>
+  <form method="POST" action="/admin/login">
+    <h1>Trang quản trị sự kiện</h1>
+    <% if (error) { %><p class="error"><%= error %></p><% } %>
+    <input type="password" name="password" placeholder="Mật khẩu quản trị" required autofocus />
+    <button type="submit">Đăng nhập</button>
+  </form>
+</body>
+</html>
