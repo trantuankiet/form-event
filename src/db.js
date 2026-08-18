@@ -41,4 +41,10 @@ function countEntries() {
   return db.prepare('SELECT COUNT(*) as c FROM entries').get().c;
 }
 
-module.exports = { insertEntry, getEntry, getAllEntries, countEntries };
+// Xoa toan bo du lieu khach hang (dung khi chuan bi cho su kien moi
+// hoac xoa du lieu test truoc su kien that). KHONG THE hoan tac.
+function deleteAllEntries() {
+  db.prepare('DELETE FROM entries').run();
+}
+
+module.exports = { insertEntry, getEntry, getAllEntries, countEntries, deleteAllEntries };

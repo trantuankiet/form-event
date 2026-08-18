@@ -68,10 +68,21 @@ async function saveFrame(uploadedFilePath) {
     .toFile(FRAME_PATH);
 }
 
+// Xoa toan bo anh khach da tao (dung khi reset du lieu cho su kien moi).
+// Frame (frame.png) KHONG bi dong den boi ham nay - reset chi lien quan
+// den du lieu khach, khong lien quan den frame.
+function clearAllPhotos() {
+  const files = fs.readdirSync(PHOTOS_DIR);
+  for (const file of files) {
+    fs.unlinkSync(path.join(PHOTOS_DIR, file));
+  }
+}
+
 module.exports = {
   composePhoto,
   saveFrame,
   hasCustomFrame,
+  clearAllPhotos,
   FRAME_PATH,
   PHOTOS_DIR,
 };

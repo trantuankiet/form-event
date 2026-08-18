@@ -141,6 +141,7 @@ app.get('/admin/dashboard', requireAdmin, (req, res) => {
     count: db.countEntries(),
     hasCustomFrame,
     frameUrl: `/admin/frame-preview?ts=${Date.now()}`,
+    resetStatus: req.query.reset || null,
   });
 });
 
@@ -160,6 +161,17 @@ app.post('/admin/upload-frame', requireAdmin, upload.single('frame'), async (req
   } catch (err) {
     console.error(err);
     res.status(500).send('Có lỗi khi tải lên frame.');
+  }
+});
+
+app.post('/admin/reset', requireAdmin, (req, res) => {
+  try {
+    db.deleteAllEntries();
+    compositor.clearAllPhotos();
+    res.redirect('/admin/dashboard?reset=success');
+  } catch (err) {
+    console.error(err);
+    res.redirect('/admin/dashboard?reset=error');
   }
 });
 

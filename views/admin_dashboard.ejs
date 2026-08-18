@@ -20,6 +20,28 @@
   .link-btn { background:none; border:none; color:#666; text-decoration:underline; cursor:pointer; font-size:14px; }
   input[type=file] { display:block; margin: 12px 0; }
   .warn { color:#b45309; background:#fffbeb; padding:10px 14px; border-radius:8px; font-size:14px; }
+
+  .banner { padding: 14px 18px; border-radius: 10px; font-size: 15px; margin-bottom: 20px; }
+  .banner-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+  .banner-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+  .card-danger { border: 1px solid #fecaca; }
+  .btn-danger-outline {
+    padding: 12px 20px; border-radius: 8px; border: 1.5px solid #dc2626;
+    background: #fff; color: #dc2626; font-size: 15px; cursor: pointer; font-weight: 600;
+  }
+  .btn-danger {
+    padding: 12px 20px; border-radius: 8px; border: none;
+    background: #dc2626; color: #fff; font-size: 15px; cursor: pointer;
+    font-weight: 600; margin-top: 10px;
+  }
+  .btn-danger:disabled { background: #fca5a5; cursor: not-allowed; }
+  #reset-confirm-input {
+    width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px;
+    font-size: 15px; margin-bottom: 4px;
+  }
+  #reset-confirm-input:focus { outline: none; border-color: #dc2626; }
+  code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -28,6 +50,12 @@
     <button type="submit" class="link-btn">Đăng xuất</button>
   </form>
   <h1>Bảng điều khiển sự kiện</h1>
+
+  <% if (resetStatus === 'success') { %>
+    <div class="banner banner-success">✓ Đã reset thành công. Toàn bộ dữ liệu khách và ảnh đã được xoá, số đếm đã về 0.</div>
+  <% } else if (resetStatus === 'error') { %>
+    <div class="banner banner-error">✕ Có lỗi khi reset, vui lòng thử lại hoặc liên hệ kỹ thuật.</div>
+  <% } %>
 
   <div class="card">
     <h2>Số lượt đã điền form</h2>
@@ -50,6 +78,60 @@
     </form>
     <p style="color:#888; font-size:13px;">Lưu ý: đổi frame chỉ áp dụng cho ảnh tạo SAU thời điểm tải lên, ảnh cũ đã sinh trước đó không đổi.</p>
   </div>
+  <div class="card card-danger">
+    <h2>⚠ Reset dữ liệu (chuẩn bị sự kiện mới)</h2>
+    <p style="color:#666; font-size:14px;">
+      Dùng khi muốn xoá sạch dữ liệu để bắt đầu sự kiện mới, hoặc xoá dữ liệu
+      nhập thử trước khi sự kiện thật diễn ra. Thao tác này sẽ xoá
+      <strong>toàn bộ <%= count %> lượt khách đã check-in</strong> và toàn bộ
+      ảnh đã tạo, đưa số đếm về 0. <strong>Frame hiện tại sẽ được giữ nguyên,
+      không bị xoá.</strong>
+    </p>
+    <p class="warn" style="margin-bottom:16px;">
+      Hành động này <strong>KHÔNG THỂ hoàn tác</strong>. Hãy chắc chắn đã xuất
+      Excel backup nếu còn cần dữ liệu hiện tại trước khi reset.
+    </p>
+
+    <button id="reset-toggle-btn" type="button" class="btn-danger-outline">
+      Tôi muốn reset dữ liệu
+    </button>
+
+    <form id="reset-form" method="POST" action="/admin/reset" style="display:none; margin-top:16px;">
+      <label style="display:block; margin-bottom:8px; font-size:14px;">
+        Gõ chính xác chữ <code>XOA</code> vào ô bên dưới để mở khoá nút xác nhận:
+      </label>
+      <input type="text" id="reset-confirm-input" placeholder="Gõ XOA để xác nhận" autocomplete="off" />
+      <button type="submit" id="reset-submit-btn" class="btn-danger" disabled>
+        Xác nhận xoá toàn bộ dữ liệu
+      </button>
+    </form>
+  </div>
 </div>
+
+<script>
+  const toggleBtn = document.getElementById('reset-toggle-btn');
+  const resetForm = document.getElementById('reset-form');
+  const resetInput = document.getElementById('reset-confirm-input');
+  const resetSubmitBtn = document.getElementById('reset-submit-btn');
+
+  toggleBtn.addEventListener('click', () => {
+    const showing = resetForm.style.display !== 'none';
+    resetForm.style.display = showing ? 'none' : 'block';
+    toggleBtn.textContent = showing ? 'Tôi muốn reset dữ liệu' : 'Ẩn form reset';
+  });
+
+  resetInput.addEventListener('input', () => {
+    resetSubmitBtn.disabled = resetInput.value.trim() !== 'XOA';
+  });
+
+  // Lop xac nhan thu 2: popup canh bao cuoi cung ngay truoc khi thuc su gui request xoa.
+  resetForm.addEventListener('submit', (e) => {
+    const ok = confirm(
+      'XÁC NHẬN LẦN CUỐI: Bạn sắp XOÁ VĨNH VIỄN toàn bộ dữ liệu khách hàng đã check-in. ' +
+      'Hành động này KHÔNG THỂ hoàn tác. Bạn có chắc chắn muốn tiếp tục?'
+    );
+    if (!ok) e.preventDefault();
+  });
+</script>
 </body>
 </html>
